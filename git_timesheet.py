@@ -8,8 +8,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Generate timesheet from git logs")
     parser.add_argument('directory', help='directory to use (example: python git_timesheet.py ~/Code/some_repo', action='store')
-    parser.add_argument('-d', '--date', help='year and month to generate summary for (example: -d 2013.10)', action='store')
-    parser.add_argument('-a', '--author', help='name of author (example: -a "Murat Ayfer"', action='store')
+    parser.add_argument('-d', '--date', help='year and month to generate summary for (example: -d 2013.10)', action='store', nargs='?', default=None)
+    parser.add_argument('-a', '--author', help='name of author (example: -a "Murat Ayfer"', action='store', nargs='?', default=None)
     args = parser.parse_args()
 
     directory = args.directory
@@ -18,7 +18,11 @@ if __name__ == '__main__':
 
     os.chdir(directory)
 
-    command = 'git log --date=iso --since={date}.01 --until={date}.31 --author="{author}" --pretty="format:%ad | %an | %s"'.format(date=date, author=author)
+    command = 'git log --date=iso --pretty="format:%ad | %an | %s"'
+    if date is not None:
+        command += " --since={date}.01 --until={date}.31".format(date=date)
+    if author is not None:
+        command += " --author='{author}'".format(author=author)
 
     process = Popen(command, stdout=PIPE, shell=True)
     log_output, stderr = process.communicate()
